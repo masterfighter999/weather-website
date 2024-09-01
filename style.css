@@ -1,0 +1,139 @@
+/* Dropdown */
+.dropdown-menu {
+  background: linear-gradient(45deg, #576574, #C2B6B6);  
+}
+
+
+/* Base styling for the card */
+.card-body {
+  position: relative;
+  padding: 20px;
+  /* Uniform padding for all card bodies */
+  border-radius: 35px;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+/* Gradient border hidden by default */
+.card::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: -20px;
+  right: -20px;
+  bottom: -10px;
+  background-image: conic-gradient(#FF0000, #FF7300, #FFFB00, #48FF00, #00FFD5, #002BFF, #FF00C8, #FF0000);
+  z-index: -1;
+  border-radius: inherit;
+  filter: blur(1.5rem);
+  opacity: 0;
+  /* Hidden initially */
+  background-size: 200% 200%;
+  /* Double the background size */
+  transition: opacity 0.3s ease-in-out;
+}
+
+/* Animation for gradient movement in both directions */
+@keyframes gradient-move {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Show the gradient border and animate on hover */
+.card:hover::before {
+  opacity: 1;
+  animation: gradient-move 4s linear infinite;
+}
+
+/* Increase card size and change text color on hover */
+.card:hover .card-body {
+  transform: scale(1.05);
+  background: linear-gradient(45deg, #576574, #C2B6B6);
+}
+
+/* Styling for the PM 0.3 label */
+.pm-label {
+  position: absolute;
+  top: 10px;
+  right: 25px;
+  font-size: 0.75rem;
+  /* Smaller font size */
+  color: white;
+  transition: color 0.3s ease;
+}
+
+/* Override color change on hover for PM 0.3 label */
+.card:hover .pm-label {
+  color: black;
+  font-weight: bold;
+  /* Customize the color for PM 0.3 */
+}
+
+/* General hover color change for other elements */
+.card:hover .card-body h6,
+.card:hover .card-body p,
+.card:hover .card-body span:not(.pm-label),
+/* Exclude .pm-label */
+.card:hover .card-body div {
+  color: #ffff00;
+}
+
+/* Navbar link animation */
+.nav-link {
+  position: relative;
+  margin: 0 10px;
+  padding: 10px 20px;
+  color: white;
+  cursor: pointer;
+  border-radius: 12px;
+  z-index: 0;
+  transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.nav-link::before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  background: linear-gradient(
+    45deg,
+    #ff4545, #00ff99, #3494E6, #ff0095, #ff4545
+  );
+  background-size: 600%;
+  z-index: -1;
+  border-radius: 12px;
+  filter: blur(8px);
+  animation: glowing 20s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.nav-link:hover::before {
+  opacity: 1;
+}
+
+.nav-link:active::after {
+  background: transparent;
+}
+
+@keyframes glowing {
+  0% { background-position: 0 0; }
+  50% { background-position: 400% 0; }
+  100% { background-position: 0 0; }
+}
+
+.nav-link:active {
+  color: black;
+  font-weight: bold;
+}

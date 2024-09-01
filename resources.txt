@@ -1,0 +1,333 @@
+async function fetchData() {
+  const url = 'https://yahoo-weather5.p.rapidapi.com/weather?location=bolpur&format=json&u=c';
+  const options = {
+    method: 'GET',
+    headers: {
+      'x-rapidapi-key': '28e3a15b5dmshafb5476029f7e6ep17c4e5jsnc47746926522',
+      'x-rapidapi-host': 'yahoo-weather5.p.rapidapi.com'
+    }
+  };
+
+  try {
+    const response = await fetch(url, options);
+    const result = await response.json();
+    console.log(result); // For debugging: log the result to see the structure
+    updateWeatherDisplay(result);
+  } catch (error) {
+    console.error(error);
+  }
+}
+
+function updateWeatherDisplay(data) {
+  const weatherIcon = document.getElementById('weather-icon');
+  const temperature = document.getElementById('temperature');
+  const humidity = document.getElementById('humidity');
+  const airPressure = document.getElementById('air-pressure');
+  const windSpeed = document.getElementById('wind-speed');
+  const windDirection = document.getElementById('wind-direction');
+  const pm0_3 = document.getElementById('pm-0-3');
+  const pm1_0 = document.getElementById('pm-1-0');
+  const pm2_5 = document.getElementById('pm-2-5');
+  const description = document.getElementById('weather-description');
+
+  const weatherDescription = data.current_observation.condition.text.toLowerCase();
+  const tempValue = data.current_observation.condition.temperature;
+  const humidityValue = data.current_observation.atmosphere.humidity;
+  const pressureValue = data.current_observation.atmosphere.pressure;
+  const windSpeedValue = data.current_observation.wind.speed;
+  const windDirectionValue = data.current_observation.wind.direction;
+
+  // PM values are not provided by this API, so setting placeholder values
+  const pm0_3Value = '40 PM'; // Example placeholder value
+  const pm1_0Value = '40 PM'; // Example placeholder value
+  const pm2_5Value = '20 PM'; // Example placeholder value
+
+  const currentTime = new Date();
+  const currentHour = currentTime.getHours();
+  
+  console.log("Current Hour:", currentHour); // Debugging: Log current hour
+  
+  // Determine if it's day or night
+  const isDayTime = currentHour >= 6 && currentHour < 18;
+  console.log("Is Day Time:", isDayTime); // Debugging: Log day/night status
+
+  // Update temperature, humidity, and pressure
+  temperature.textContent = `${tempValue}°C`;
+  humidity.textContent = `${humidityValue}%`;
+  airPressure.textContent = `${pressureValue} hPa`;
+  windSpeed.textContent = `${windSpeedValue} km/h`; // Convert to km/h if needed
+  windDirection.textContent = windDirectionValue;
+
+  // PM values
+  pm0_3.textContent = pm0_3Value;
+  pm1_0.textContent = pm1_0Value;
+  pm2_5.textContent = pm2_5Value;
+
+  description.textContent = weatherDescription.charAt(0).toUpperCase() + weatherDescription.slice(1);
+
+  // Set the appropriate weather icon based on conditions
+  if (isDayTime) {
+    if (weatherDescription.includes('clear')) {
+      weatherIcon.src = 'sun.gif';
+    } else if (weatherDescription.includes('cloud')) {
+      weatherIcon.src = 'cloudy day.gif';
+    } else if (weatherDescription.includes('rain')) {
+      weatherIcon.src = 'stormy day.gif';
+    }
+  } else {
+    if (weatherDescription.includes('clear')) {
+      weatherIcon.src = 'moon.gif';
+    } else if (weatherDescription.includes('cloud')) {
+      weatherIcon.src = 'cloudy night.gif';
+    } else if (weatherDescription.includes('rain')) {
+      weatherIcon.src = 'stormy night.gif';
+    }
+  }
+}
+
+// Call fetchData to get the weather information and update the display
+fetchData();
+
+
+
+
+// accuweather api not used
+
+
+async function fetchWeatherData(cityName) {
+  const locationKeyUrl = `http://dataservice.accuweather.com/locations/v1/cities/search?apikey=8YtHAoOQ1FzVhicA5B0B0bmYnwoVoOjU&q=${cityName}`;
+  
+  try {
+    // Fetch the location key
+    const locationResponse = await fetch(locationKeyUrl);
+    const locationData = await locationResponse.json();
+
+    if (!locationData || locationData.length === 0) {
+      console.error('Location not found');
+      return;
+    }
+
+    const locationKey = locationData[0].Key;
+    const weatherUrl = `http://dataservice.accuweather.com/currentconditions/v1/${locationKey}?apikey=8YtHAoOQ1FzVhicA5B0B0bmYnwoVoOjU`;
+
+    // Fetch the weather data using the location key
+    const weatherResponse = await fetch(weatherUrl);
+    const weatherData = await weatherResponse.json();
+
+    if (!weatherData || weatherData.length === 0) {
+      console.error('Weather data not found');
+      return;
+    }
+
+    // Update the display with fetched weather data
+    updateWeatherDisplay(weatherData[0]);
+  } catch (error) {
+    console.error('Error fetching weather data:', error);
+  }
+}
+
+function updateWeatherDisplay(data) {
+  const weatherIcon = document.getElementById('weather-icon');
+  const temperature = document.getElementById('temperature');
+  const humidity = document.getElementById('humidity');
+  const airPressure = document.getElementById('air-pressure');
+  const windSpeed = document.getElementById('wind-speed');
+  const windDirection = document.getElementById('wind-direction');
+  const pm0_3 = document.getElementById('pm-0-3');
+  const pm1_0 = document.getElementById('pm-1-0');
+  const pm2_5 = document.getElementById('pm-2-5');
+  const description = document.getElementById('weather-description');
+  const observationTime = document.getElementById('observation-time'); // New element for observation time
+
+  const weatherDescription = data.WeatherText.toLowerCase();
+  const tempValue = data.Temperature?.Metric?.Value || 'N/A'; // Use optional chaining and fallback value
+  const humidityValue = data.RelativeHumidity || 'N/A'; // Handle missing data
+  const pressureValue = data.Pressure?.Metric?.Value || 'N/A'; // Use optional chaining
+  const windSpeedValue = data.Wind?.Speed?.Metric?.Value || 'N/A'; // Use optional chaining
+  const windDirectionValue = data.Wind?.Direction?.Localized || 'N/A'; // Use optional chaining
+
+  // PM values are placeholders, as AccuWeather API does not provide PM data
+  const pm0_3Value = '40 PM'; // Placeholder value
+  const pm1_0Value = '40 PM'; // Placeholder value
+  const pm2_5Value = '20 PM'; // Placeholder value
+
+  // Display the observation time from the API
+  const observationDateTime = new Date(data.LocalObservationDateTime);
+  const formattedObservationTime = observationDateTime.toLocaleString(); // Format as a readable date-time string
+  
+  // Update the display with fetched weather data
+  temperature.textContent = `${tempValue}°C`;
+  humidity.textContent = `${humidityValue}%`;
+  airPressure.textContent = `${pressureValue} hPa`;
+  windSpeed.textContent = `${windSpeedValue} km/h`;
+  windDirection.textContent = windDirectionValue;
+
+  // PM values
+  pm0_3.textContent = pm0_3Value;
+  pm1_0.textContent = pm1_0Value;
+  pm2_5.textContent = pm2_5Value;
+
+  description.textContent = weatherDescription.charAt(0).toUpperCase() + weatherDescription.slice(1);
+
+  // Set the observation time on the page
+  if (observationTime) {
+    observationTime.textContent = `Last Updated: ${formattedObservationTime}`;
+  }
+
+  // Set the appropriate weather icon based on conditions
+  if (data.IsDayTime) {
+    if (weatherDescription.includes('sunny') || weatherDescription.includes('clear')) {
+      weatherIcon.src = 'sun.gif';
+    } else if (weatherDescription.includes('cloud')) {
+      weatherIcon.src = 'cloudy day.gif';
+    } else if (weatherDescription.includes('rain')) {
+      weatherIcon.src = 'stormy day.gif';
+    }
+  } else {
+    if (weatherDescription.includes('clear')) {
+      weatherIcon.src = 'moon.gif';
+    } else if (weatherDescription.includes('cloud')) {
+      weatherIcon.src = 'cloudy night.gif';
+    } else if (weatherDescription.includes('rain')) {
+      weatherIcon.src = 'stormy night.gif';
+    }
+  }
+}
+
+// Call fetchWeatherData with a default city
+fetchWeatherData('Bolpur');
+
+// Attach event listener to the search button
+document.getElementById('findbtn-icon').addEventListener('click', () => {
+  const cityInput = document.querySelector('input[type="search"]').value.trim();
+  if (cityInput) {
+    fetchWeatherData(cityInput);
+  }
+});
+
+
+
+
+
+
+
+
+
+
+// openweather api 
+
+async function fetchWeatherData(cityName) {
+    const geoCodeUrl = `http://api.openweathermap.org/geo/1.0/direct?q=${cityName}&limit=1&appid=e47cc881d4676698c911a1548745c0a0`;
+  
+    try {
+      // Fetch the geographic coordinates (latitude and longitude)
+      const locationResponse = await fetch(geoCodeUrl);
+      const locationData = await locationResponse.json();
+  
+      if (!locationData || locationData.length === 0) {
+        console.error('Location not found');
+        return;
+      }
+  
+      const { lat, lon } = locationData[0];
+      const weatherUrl = `https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&appid=e47cc881d4676698c911a1548745c0a0&units=metric`;
+  
+      // Fetch the weather data using latitude and longitude
+      const weatherResponse = await fetch(weatherUrl);
+      const weatherData = await weatherResponse.json();
+  
+      if (!weatherData) {
+        console.error('Weather data not found');
+        return;
+      }
+  
+      // Update the display with fetched weather data
+      updateWeatherDisplay(weatherData);
+    } catch (error) {
+      console.error('Error fetching weather data:', error);
+    }
+  }
+  
+  function updateWeatherDisplay(data) {
+    const cityName = document.getElementById('location'); // New element for city name
+    const weatherIcon = document.getElementById('weather-icon');
+    const temperature = document.getElementById('temperature');
+    const humidity = document.getElementById('humidity');
+    const airPressure = document.getElementById('air-pressure');
+    const windSpeed = document.getElementById('wind-speed');
+    const windDirection = document.getElementById('wind-direction');
+    const pm0_3 = document.getElementById('pm-0-3');
+    const pm1_0 = document.getElementById('pm-1-0');
+    const pm2_5 = document.getElementById('pm-2-5');
+    const description = document.getElementById('weather-description');
+    const observationTime = document.getElementById('observation-time'); // New element for observation time
+  
+    const weatherDescription = data.weather[0].description.toLowerCase();
+    const tempValue = data.main.temp || 'N/A';
+    const humidityValue = data.main.humidity || 'N/A';
+    const pressureValue = data.main.pressure || 'N/A';
+    const windSpeedValue = data.wind.speed || 'N/A';
+    const windDirectionValue = data.wind.deg || 'N/A';
+  
+    // PM values are placeholders, as OpenWeatherMap API does not provide PM data
+    const pm0_3Value = '40 PM'; // Placeholder value
+    const pm1_0Value = '40 PM'; // Placeholder value
+    const pm2_5Value = '20 PM'; // Placeholder value
+  
+    // Display the observation time from the API
+    const observationDateTime = new Date(data.dt * 1000); // Convert Unix timestamp to JavaScript date
+    const formattedObservationTime = observationDateTime.toLocaleString(); // Format as a readable date-time string
+    
+    // Update the display with fetched weather data
+    cityName.textContent = data.name || 'Unknown location'; // Display the city name
+    temperature.textContent = `${tempValue}°C`;
+    humidity.textContent = `${humidityValue}%`;
+    airPressure.textContent = `${pressureValue} hPa`;
+    windSpeed.textContent = `${windSpeedValue} km/h`;
+    windDirection.textContent = windDirectionValue;
+  
+    // PM values
+    pm0_3.textContent = pm0_3Value;
+    pm1_0.textContent = pm1_0Value;
+    pm2_5.textContent = pm2_5Value;
+  
+    description.textContent = weatherDescription.charAt(0).toUpperCase() + weatherDescription.slice(1);
+  
+    // Set the observation time on the page
+    if (observationTime) {
+      observationTime.textContent = `Last Updated: ${formattedObservationTime}`;
+    }
+  
+    // Set the appropriate weather icon based on conditions
+    const isDayTime = data.weather[0].icon.includes('d'); // 'd' in icon name indicates daytime
+  
+    if (isDayTime) {
+      if (weatherDescription.includes('clear')) {
+        weatherIcon.src = 'sun.gif';
+      } else if (weatherDescription.includes('cloud')) {
+        weatherIcon.src = 'cloudy day.gif';
+      } else if (weatherDescription.includes('rain')) {
+        weatherIcon.src = 'stormy day.gif';
+      }
+    } else {
+      if (weatherDescription.includes('clear')) {
+        weatherIcon.src = 'moon.gif';
+      } else if (weatherDescription.includes('cloud')) {
+        weatherIcon.src = 'cloudy night.gif';
+      } else if (weatherDescription.includes('rain')) {
+        weatherIcon.src = 'stormy night.gif';
+      }
+    }
+  }
+  
+  // Call fetchWeatherData with a default city
+  fetchWeatherData('Bolpur');
+  
+  // Attach event listener to the search button
+  document.getElementById('findbtn-icon').addEventListener('click', () => {
+    const cityInput = document.querySelector('input[type="search"]').value.trim();
+    if (cityInput) {
+      fetchWeatherData(cityInput);
+    }
+  });
+  
